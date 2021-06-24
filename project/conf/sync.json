@@ -1,0 +1,155 @@
+{
+    "mappings": [
+        {
+            "name" : "managedUser_ldapAccount",
+            "source" : "managed/user",
+            "target" : "system/openldap/account",
+            "onCreate" : {
+                "type" : "text/javascript",
+                "source" : "target.dn = 'cn=' + source.userName + ',dc=wrensecurity,dc=org';"
+            },
+            "onUpdate" : {
+                "type" : "text/javascript",
+                "source" : "target.dn = 'cn=' + source.userName + ',dc=wrensecurity,dc=org';"
+            },
+            "validSource": {
+                "type": "text/javascript",
+                "source": "source.userName.length <= 10"
+            },
+            "validTarget": {
+                "type": "text/javascript",
+                "source": "target.cn.length <= 10"
+            },
+            "properties": [
+                {
+                    "source": "userName",
+                    "target": "cn"
+                },
+                {
+                    "source": "sn",
+                    "target": "sn"
+                }
+            ],
+            "policies" : [
+                {
+                    "situation" : "UNQUALIFIED",
+                    "action" : "UPDATE"
+                },
+                {
+                    "situation" : "SOURCE_MISSING",
+                    "action" : "DELETE"
+                },
+                {
+                    "situation" : "ABSENT",
+                    "action" : "CREATE"
+                },
+                {
+                    "situation" : "FOUND",
+                    "action" : "LINK"
+                }
+            ]
+        },
+        {
+            "name" : "csvFile_managedUser",
+            "source" : "system/csvFile/account",
+            "target" : "managed/user",
+            "correlationQuery" : {
+                "type": "text/javascript",
+                "source": "var qry = {'_queryFilter': 'sn eq \"' + source.lastName + '\"'}; qry"
+            },
+            "properties" : [
+                {
+                    "source" : "name",
+                    "target" : "userName"
+                },
+                {
+                    "source" : "lastname",
+                    "target" : "sn"
+                },
+                {
+                    "source" : "firstname",
+                    "target" : "givenName",
+                    "transform" : {
+                        "type" : "groovy",
+                        "globals" : { },
+                        "source" : "source ? source.toLowerCase() : null"
+                    }
+                },
+                {
+                    "source" : "email",
+                    "target" : "mail"
+                },
+                {
+                    "source" : "phone",
+                    "target" : "telephoneNumber"
+                },
+                {
+                    "default" : "Password123",
+                    "target" : "password"
+                },
+                {
+                    "source" : "roles",
+                    "transform" : {
+                        "type" : "text/javascript",
+                        "source" : "source.split(',').map(function (r) { return {'_ref' : (r.indexOf('openidm-') === 0 ? 'repo/internal/role/' : 'managed/role/') + r }; })"
+                    },
+                    "target" : "authzRoles"
+                }
+            ],
+            "policies" : [
+                {
+                    "situation" : "CONFIRMED",
+                    "action" : "UPDATE"
+                },
+                {
+                    "situation" : "FOUND",
+                    "action" : "UPDATE"
+                },
+                {
+                    "situation" : "ABSENT",
+                    "action" : "CREATE"
+                },
+                {
+                    "situation" : "AMBIGUOUS",
+                    "action" : "EXCEPTION"
+                },
+                {
+                    "situation" : "MISSING",
+                    "action" : "CREATE"
+                },
+                {
+                    "situation" : "SOURCE_MISSING",
+                    "action" : "DELETE"
+                },
+                {
+                    "situation" : "UNQUALIFIED",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "UNASSIGNED",
+                    "action" : "DELETE"
+                }
+            ]
+        },
+        {
+            "name" : "systemRoleFileRole_managedRole",
+            "source" : "system/roleFile/role",
+            "target" : "managed/role",
+            "properties" : [
+                {
+                    "source" : "_id",
+                    "target" : "_id"
+                },
+                {
+                    "source" : "_id",
+                    "target" : "name"
+                },
+                {
+                    "source" : "name",
+                    "target" : "description"
+                }
+            ]
+        }
+
+    ]
+}

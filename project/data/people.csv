@@ -1,0 +1,5 @@
+"firstname", "lastname", "name", "email", "phone", "roles"
+"Joe", "Blue", "joe.bluE", "joe.blue@example.com", "123-456-789", "openidm-authorized,employee"
+"Kate", "Smith", "KATE.SmItH", "kate.smith@example.com", "999-456-789", "openidm-authorized,manager"
+"Hello", "Unqualified", "foooooooooo.barrrrrrr", "hey.there@example.com", "999-456-789", "openidm-authorized,manager"
+

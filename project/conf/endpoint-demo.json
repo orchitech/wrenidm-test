@@ -1,0 +1,5 @@
+{
+    "context" : "endpoint/demo/*",
+    "type" : "text/javascript",
+    "file" : "script/demo.js"
+}
