@@ -145,9 +145,15 @@ var httpAccessConfig =
         {
             "pattern"   : "managed/user/*",
             "roles"     : "*",
-            "methods"   : "read",
+            "methods"   : "read,create",
             "actions"   : "*",
             "customAuthz" : "(checkIfUIIsEnabled('forgotUsername') || checkIfUIIsEnabled('passwordReset')) && isSelfServiceRequest()"
+        },
+        {
+            "pattern"   : "managed/testobject",
+            "roles"     : "*",
+            "methods"   : "read",
+            "actions"   : "*"
         },
         {
             "pattern"   : "managed/user/*",

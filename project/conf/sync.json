@@ -55,7 +55,11 @@
             "target" : "managed/user",
             "correlationQuery" : {
                 "type": "text/javascript",
-                "source": "var qry = {'_queryFilter': 'sn eq \"' + source.lastName + '\"'}; qry"
+                "source": "var qry = {'_queryFilter': 'sn eq \"' + source.lastName + '\"'}; logger.error('sssssssseeeeeeeeeeeeeeeeeeeeeeee');qry"
+            },
+            "postCreate" : {
+                "type": "text/javascript",
+                "source": "logger.error('POSTCREATEEEEEEE')"
             },
             "properties" : [
                 {

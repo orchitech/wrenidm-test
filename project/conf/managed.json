@@ -934,6 +934,34 @@
                     "value"
                 ]
             }
+        },
+        {
+            "name" : "testobject",
+            "schema" : {
+                "$schema" : "http://forgerock.org/json-schema#",
+                "type" : "object",
+                "title" : "",
+                "description" : "",
+                "icon" : "",
+                "properties" : {
+                    "val" : {
+                        "description" : "",
+                        "title" : "",
+                        "viewable" : true,
+                        "searchable" : false,
+                        "userEditable" : false,
+                        "policies" : [ ],
+                        "returnByDefault" : false,
+                        "minLength" : null,
+                        "pattern" : "",
+                        "type" : "string"
+                    }
+                },
+                "required" : [ ],
+                "order" : [
+                    "val"
+                ]
+            }
         }
     ]
 }

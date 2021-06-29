@@ -27,6 +27,8 @@ CREATE TABLE IF NOT EXISTS openidm.genericobjects (
   CONSTRAINT idx_genericobjects_object UNIQUE (objecttypes_id, objectid)
 );
 
+
+
 -- -----------------------------------------------------
 -- Table openidm.genericobjectproperties
 -- -----------------------------------------------------
@@ -149,6 +151,13 @@ CREATE TABLE IF NOT EXISTS openidm.links (
 
 CREATE UNIQUE INDEX IF NOT EXISTS idx_links_first ON openidm.links (linktype, linkqualifier, firstid);
 CREATE UNIQUE INDEX IF NOT EXISTS idx_links_second ON openidm.links (linktype, linkqualifier, secondid);
+
+CREATE TABLE IF NOT EXISTS openidm.testobject (
+  objectid VARCHAR(38) NOT NULL,
+  rev VARCHAR(38) NOT NULL,
+  val VARCHAR(50) NOT NULL,
+  PRIMARY KEY (objectid)
+);
 
 -- -----------------------------------------------------
 -- Table openidm.securitykeys

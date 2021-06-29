@@ -22,6 +22,13 @@
             ]
         },
         {
+            "pattern": "endpoint/foo",
+            "onRequest" : {
+                "type": "text/javascript",
+                "file": "script/rejectByParamValue.js"
+            }
+        },
+        {
             "pattern" : "repo/internal/user.*",
             "onRequest" : {
                 "type" : "text/javascript",
