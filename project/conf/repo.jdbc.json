@@ -124,7 +124,8 @@
                 "table": "testobject",
                 "objectToColumn" : {
                     "_id": "objectid",
-                    "_rev": "rev"
+                    "_rev": "rev",
+                    "val": "val"
                 }
             },
             "ui/notification" : {

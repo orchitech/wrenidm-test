@@ -17,7 +17,7 @@
         "#groovy.script.extension" : ".groovy",
         "#groovy.script.base" : "#any class extends groovy.lang.Script",
         "groovy.recompile" : "true",
-        "groovy.recompile.minimumInterval" : "60000",
+        "groovy.recompile.minimumInterval" : "1000",
         "#groovy.target.indy" : "true",
         "#groovy.disabled.global.ast.transformations" : ""
     },
