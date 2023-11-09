@@ -1,7 +1,0 @@
-{
-    "jdbcUrl" : "jdbc:h2:tcp://h2database/~/openidm;DB_CLOSE_DELAY=-1;",
-    "driverClass" : "org.h2.Driver",
-    "username" : "openidm",
-    "password" : "openidm",
-    "databaseName" : "openidm"
-}

@@ -1,9 +1,0 @@
-{
-    "username" : "admin",
-    "password" : {
-        "$crypto" : {
-            "type" : "x-simple-encryption",
-            "value" : "admin"
-        }
-    }
-}
