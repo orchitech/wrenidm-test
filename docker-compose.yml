@@ -1,43 +1,63 @@
 version: "3.4"
+
 services:
-
   wrenidm:
-    image: ${WRENIDM_IMAGE:-wrenidm:latest}
-    container_name: wrenidm
-    command: ["-p", "project"]
+    image: ${WRENIDM_IMAGE:-wrenidm}
+    container_name: wrenidm-test
     depends_on:
-      - openldap
-      - h2database
-      - maildev
-    ports:
-      - "8080:8080"
-      - "8443:8443"
+      - h2
+      - ldap
+      - smtp
+    networks:
+      wrenidm:
+        ipv4_address: 10.0.0.11
+    extra_hosts:
+      - "wrenidm.wrensecurity.local:10.0.0.11"
+      - "h2.wrensecurity.local:10.0.0.21"
+      - "ldap.wrensecurity.local:10.0.0.31"
+      - "smtp.wrensecurity.local:10.0.0.41"
     volumes:
-      - type: bind
-        source: ./project
-        target: /opt/wrenidm/project
+      - ./docker/wrenidm/conf/config.properties:/opt/wrenidm/conf/config.properties:ro
+      - ./docker/wrenidm/conf/datasource.jdbc-h2.json:/opt/wrenidm/conf/datasource.jdbc-h2.json:ro
+      - ./docker/wrenidm/conf/endpoint-custom.json:/opt/wrenidm/conf/endpoint-custom.json:ro
+      - ./docker/wrenidm/conf/external.email.json:/opt/wrenidm/conf/external.email.json:ro
+      - ./docker/wrenidm/conf/provisioner.openicf-csv.json:/opt/wrenidm/conf/provisioner.openicf-csv.json:ro
+      - ./docker/wrenidm/conf/provisioner.openicf-ldap.json:/opt/wrenidm/conf/provisioner.openicf-ldap.json:ro
+      - ./docker/wrenidm/conf/sync.json:/opt/wrenidm/conf/sync.json:ro
+      - ./docker/wrenidm/conf/system.properties:/opt/wrenidm/conf/system.properties:ro
+      - ./docker/wrenidm/script:/opt/wrenidm/script:ro
+      - ./docker/wrenidm/workflow:/opt/wrenidm/workflow:ro
+      - ./docker/wrenidm/data:/tmp/data
 
-  openldap:
+  h2:
+    build: ./docker/h2
+    container_name: wrenidm-test-db
+    networks:
+      wrenidm:
+        ipv4_address: 10.0.0.21
+
+  ldap:
     image: osixia/openldap:1.5.0
-    container_name: openldap
-    command: --loglevel debug
-    ports:
-      - "389:389"
-      - "636:636"
-
+    container_name: wrenidm-test-ldap
     environment:
       LDAP_ORGANISATION: "Wren Security"
       LDAP_DOMAIN: "wrensecurity.org"
+      LDAP_ADMIN_PASSWORD: "password"
+    command: "--copy-service --loglevel debug"
+    networks:
+      wrenidm:
+        ipv4_address: 10.0.0.31
 
-  h2database:
-    build: ./docker/h2
-    container_name: h2database
-    ports:
-      - "8082:8082"
-      - "9092:9092"
+  smtp:
+    image: mailhog/mailhog
+    container_name: wrenidm-test-smtp
+    networks:
+      wrenidm:
+        ipv4_address: 10.0.0.41
 
-  maildev:
-    image: maildev/maildev
-    container_name: maildev
-    ports:
-      - "1080:80"
+networks:
+  wrenidm:
+    name: wrenidm-test
+    ipam:
+      config:
+        - subnet: 10.0.0.0/24

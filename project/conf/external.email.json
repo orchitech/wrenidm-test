@@ -1,6 +1,0 @@
-{
-    "host" : "maildev",
-    "port" : "25",
-    "from" : "info@example.org",
-    "debug" : false
-}

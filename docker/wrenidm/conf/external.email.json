@@ -1,0 +1,5 @@
+{
+    "host" : "smtp.wrensecurity.local",
+    "port" : "1025",
+    "debug" : false
+}

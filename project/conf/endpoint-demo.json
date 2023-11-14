@@ -1,5 +1,0 @@
-{
-    "context" : "endpoint/demo/*",
-    "type" : "groovy",
-    "file" : "demo"
-}
