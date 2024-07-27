@@ -14,13 +14,12 @@ MANAGED_USER_DATA='{
   "telephoneNumber": "5554567",
   "password":"FooBar123"
 }'
-curl -si \
+call_curl -si \
   -X PUT \
   -H 'Content-Type: application/json' \
   -H "X-OpenIDM-Username: $ADMIN_USERNAME" \
   -H "X-OpenIDM-Password: $ADMIN_PASSWORD" \
   -d "$MANAGED_USER_DATA" \
-  --connect-to "wrenidm.wrensecurity.local:80:10.0.0.11:8080" \
-  "http://wrenidm.wrensecurity.local/openidm/managed/user/sync2" \
+  "http://wrenidm.wrensecurity.local:8080/openidm/managed/user/sync2" \
 | assert_response_status 201 \
 > /dev/null

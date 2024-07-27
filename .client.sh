@@ -1,6 +1,13 @@
 #!/bin/bash
 
 #
+# Wrapper for cURL command that is run from inside the container network.
+#
+call_curl() {
+  exec_idm curl "$@"
+}
+
+#
 # Get response body from request passed through stdin or as a function argument.
 #
 get_response_body() {

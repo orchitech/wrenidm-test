@@ -13,13 +13,12 @@ MANAGED_USER_DATA='{
   "mail": "doe@wrensecurity.org",
   "password":"Password1"
 }'
-curl -si \
+call_curl -si \
   -X PUT \
   -H 'Content-Type: application/json' \
   -H "X-OpenIDM-Username: $ADMIN_USERNAME" \
   -H "X-OpenIDM-Password: $ADMIN_PASSWORD" \
   -d "$MANAGED_USER_DATA" \
-  --connect-to "wrenidm.wrensecurity.local:80:10.0.0.11:8080" \
-  "http://wrenidm.wrensecurity.local/openidm/managed/user/endpoint" \
+  "http://wrenidm.wrensecurity.local:8080/openidm/managed/user/endpoint" \
 | assert_response_status 201 \
 > /dev/null

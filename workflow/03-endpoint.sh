@@ -8,12 +8,11 @@ log_message "03-endpoint.sh..."
 # 1. Check process definitions
 
 ## Check query operation
-curl -si \
+call_curl -si \
   -X GET \
   -H "X-OpenIDM-Username: $ADMIN_USERNAME" \
   -H "X-OpenIDM-Password: $ADMIN_PASSWORD" \
-  --connect-to "wrenidm.wrensecurity.local:80:10.0.0.11:8080" \
-  "http://wrenidm.wrensecurity.local/openidm/workflow/processdefinition?_queryId=filtered-query" \
+  "http://wrenidm.wrensecurity.local:8080/openidm/workflow/processdefinition?_queryId=filtered-query" \
 | assert_response_status \
 | assert_response_body '.resultCount == 2' \
 | assert_response_body '.result[0].key | test("onboarding|userRole")' \
@@ -22,12 +21,11 @@ curl -si \
 
 ## Check read operation
 ONBOARDING_DEFINITION_ID=$(
-  curl -si \
+  call_curl -si \
     -X GET \
     -H "X-OpenIDM-Username: $ADMIN_USERNAME" \
     -H "X-OpenIDM-Password: $ADMIN_PASSWORD" \
-    --connect-to "wrenidm.wrensecurity.local:80:10.0.0.11:8080" \
-    "http://wrenidm.wrensecurity.local/openidm/workflow/processdefinition?_queryId=filtered-query&key=onboarding" \
+    "http://wrenidm.wrensecurity.local:8080/openidm/workflow/processdefinition?_queryId=filtered-query&key=onboarding" \
   | assert_response_status \
   | assert_response_body '.resultCount == 1' \
   | assert_response_body '.result[0].key == "onboarding"' \
@@ -36,12 +34,11 @@ ONBOARDING_DEFINITION_ID=$(
 )
 
 ## Check read operation for special fields
-curl -si \
+call_curl -si \
   -X GET \
   -H "X-OpenIDM-Username: $ADMIN_USERNAME" \
   -H "X-OpenIDM-Password: $ADMIN_PASSWORD" \
-  --connect-to "wrenidm.wrensecurity.local:80:10.0.0.11:8080" \
-  "http://wrenidm.wrensecurity.local/openidm/workflow/processdefinition/$ONBOARDING_DEFINITION_ID?_fields=formProperties,formGenerationTemplate,diagram" \
+  "http://wrenidm.wrensecurity.local:8080/openidm/workflow/processdefinition/$ONBOARDING_DEFINITION_ID?_fields=formProperties,formGenerationTemplate,diagram" \
 | assert_response_status \
 | assert_response_body '.formGenerationTemplate | test("^<div id=\"onboardingForm\"")' \
 | assert_response_body '.diagram | test("^iVBORw")' \
@@ -53,12 +50,11 @@ curl -si \
 
 ## Check query operation
 ONBOARDING_APPROVAL_TASK_DEFINITION_ID=$(
-  curl -si \
+  call_curl -si \
     -X GET \
     -H "X-OpenIDM-Username: $ADMIN_USERNAME" \
     -H "X-OpenIDM-Password: $ADMIN_PASSWORD" \
-    --connect-to "wrenidm.wrensecurity.local:80:10.0.0.11:8080" \
-    "http://wrenidm.wrensecurity.local/openidm/workflow/processdefinition/$ONBOARDING_DEFINITION_ID/taskdefinition?_queryId=query-all-ids" \
+    "http://wrenidm.wrensecurity.local:8080/openidm/workflow/processdefinition/$ONBOARDING_DEFINITION_ID/taskdefinition?_queryId=query-all-ids" \
   | assert_response_status \
   | assert_response_body '.resultCount == 1' \
   | assert_response_body '.result[0]._id == "approval"' \
@@ -67,12 +63,11 @@ ONBOARDING_APPROVAL_TASK_DEFINITION_ID=$(
 )
 
 ## Check read operation
-curl -si \
+call_curl -si \
   -X GET \
   -H "X-OpenIDM-Username: $ADMIN_USERNAME" \
   -H "X-OpenIDM-Password: $ADMIN_PASSWORD" \
-  --connect-to "wrenidm.wrensecurity.local:80:10.0.0.11:8080" \
-  "http://wrenidm.wrensecurity.local/openidm/workflow/processdefinition/$ONBOARDING_DEFINITION_ID/taskdefinition/$ONBOARDING_APPROVAL_TASK_DEFINITION_ID" \
+  "http://wrenidm.wrensecurity.local:8080/openidm/workflow/processdefinition/$ONBOARDING_DEFINITION_ID/taskdefinition/$ONBOARDING_APPROVAL_TASK_DEFINITION_ID" \
 | assert_response_status \
 | assert_response_body '.name == "approval"' \
 | assert_response_body '.taskCandidateGroup | length == 1' \
@@ -94,38 +89,35 @@ WORKFLOW_DATA='{
   "mail": "john.doe@wrensecurity.org"
 }'
 WORKFLOW_ID=$(
-  curl -si \
+  call_curl -si \
     -X POST \
     -H 'Content-Type: application/json' \
     -H "X-OpenIDM-Username: $ADMIN_USERNAME" \
     -H "X-OpenIDM-Password: $ADMIN_PASSWORD" \
-    --connect-to "wrenidm.wrensecurity.local:80:10.0.0.11:8080" \
     -d "$WORKFLOW_DATA" \
-    "http://wrenidm.wrensecurity.local/openidm/workflow/processinstance?_action=create" \
+    "http://wrenidm.wrensecurity.local:8080/openidm/workflow/processinstance?_action=create" \
   | assert_response_status 201 \
   | get_response_body - \
   | jq -r "._id"
 )
 
 ## Check query operation
-curl -si \
+call_curl -si \
   -X GET \
   -H "X-OpenIDM-Username: $ADMIN_USERNAME" \
   -H "X-OpenIDM-Password: $ADMIN_PASSWORD" \
-  --connect-to "wrenidm.wrensecurity.local:80:10.0.0.11:8080" \
-  "http://wrenidm.wrensecurity.local/openidm/workflow/processinstance?_queryId=filtered-query&processInstanceId=$WORKFLOW_ID" \
+  "http://wrenidm.wrensecurity.local:8080/openidm/workflow/processinstance?_queryId=filtered-query&processInstanceId=$WORKFLOW_ID" \
 | assert_response_status \
 | assert_response_body '.resultCount == 1' \
 | assert_response_body ".result[0]._id == \"$WORKFLOW_ID\"" \
 > /dev/null
 
 ## Check read operation
-curl -si \
+call_curl -si \
   -X GET \
   -H "X-OpenIDM-Username: $ADMIN_USERNAME" \
   -H "X-OpenIDM-Password: $ADMIN_PASSWORD" \
-  --connect-to "wrenidm.wrensecurity.local:80:10.0.0.11:8080" \
-  "http://wrenidm.wrensecurity.local/openidm/workflow/processinstance/$WORKFLOW_ID" \
+  "http://wrenidm.wrensecurity.local:8080/openidm/workflow/processinstance/$WORKFLOW_ID" \
 | assert_response_status \
 | assert_response_body "._id == \"$WORKFLOW_ID\"" \
 | assert_response_body '.processVariables.userName == "onboarding-3"' \
@@ -134,21 +126,19 @@ curl -si \
 > /dev/null
 
 ## Check delete operation
-curl -si \
+call_curl -si \
   -X DELETE \
   -H "X-OpenIDM-Username: $ADMIN_USERNAME" \
   -H "X-OpenIDM-Password: $ADMIN_PASSWORD" \
-  --connect-to "wrenidm.wrensecurity.local:80:10.0.0.11:8080" \
-  "http://wrenidm.wrensecurity.local/openidm/workflow/processinstance/$WORKFLOW_ID" \
+  "http://wrenidm.wrensecurity.local:8080/openidm/workflow/processinstance/$WORKFLOW_ID" \
 | assert_response_status \
 > /dev/null
 
-curl -si \
+call_curl -si \
   -X GET \
   -H "X-OpenIDM-Username: $ADMIN_USERNAME" \
   -H "X-OpenIDM-Password: $ADMIN_PASSWORD" \
-  --connect-to "wrenidm.wrensecurity.local:80:10.0.0.11:8080" \
-  "http://wrenidm.wrensecurity.local/openidm/workflow/processinstance/history/$WORKFLOW_ID" \
+  "http://wrenidm.wrensecurity.local:8080/openidm/workflow/processinstance/history/$WORKFLOW_ID" \
 | assert_response_status \
 | assert_response_body "._id == \"$WORKFLOW_ID\"" \
 | assert_response_body '.deleteReason == "Deleted by Wren:IDM."' \
@@ -167,26 +157,24 @@ WORKFLOW_DATA='{
   "mail": "john.doe@wrensecurity.org"
 }'
 WORKFLOW_ID=$(
-  curl -si \
+  call_curl -si \
     -X POST \
     -H 'Content-Type: application/json' \
     -H "X-OpenIDM-Username: $ADMIN_USERNAME" \
     -H "X-OpenIDM-Password: $ADMIN_PASSWORD" \
-    --connect-to "wrenidm.wrensecurity.local:80:10.0.0.11:8080" \
     -d "$WORKFLOW_DATA" \
-    "http://wrenidm.wrensecurity.local/openidm/workflow/processinstance?_action=create" \
+    "http://wrenidm.wrensecurity.local:8080/openidm/workflow/processinstance?_action=create" \
   | assert_response_status 201 \
   | get_response_body - \
   | jq -r "._id"
 )
 
 TASK_ID=$(
-  curl -si \
+  call_curl -si \
     -X GET \
     -H "X-OpenIDM-Username: $ADMIN_USERNAME" \
     -H "X-OpenIDM-Password: $ADMIN_PASSWORD" \
-    --connect-to "wrenidm.wrensecurity.local:80:10.0.0.11:8080" \
-    "http://wrenidm.wrensecurity.local/openidm/workflow/taskinstance?_queryId=filtered-query&processInstanceId=$WORKFLOW_ID&taskDefinitionKey=approval" \
+    "http://wrenidm.wrensecurity.local:8080/openidm/workflow/taskinstance?_queryId=filtered-query&processInstanceId=$WORKFLOW_ID&taskDefinitionKey=approval" \
   | assert_response_status \
   | assert_response_body '.resultCount == 1' \
   | assert_response_body ".result[0].processInstanceId == \"$WORKFLOW_ID\"" \
@@ -195,12 +183,11 @@ TASK_ID=$(
 )
 
 ## Check read operation
-curl -si \
+call_curl -si \
   -X GET \
   -H "X-OpenIDM-Username: $ADMIN_USERNAME" \
   -H "X-OpenIDM-Password: $ADMIN_PASSWORD" \
-  --connect-to "wrenidm.wrensecurity.local:80:10.0.0.11:8080" \
-  "http://wrenidm.wrensecurity.local/openidm/workflow/taskinstance/$TASK_ID" \
+  "http://wrenidm.wrensecurity.local:8080/openidm/workflow/taskinstance/$TASK_ID" \
 | assert_response_status \
 | assert_response_body "._id == \"$TASK_ID\"" \
 | assert_response_body '.assignee == null' \
@@ -213,14 +200,13 @@ curl -si \
 CLAIM_DATA='{
   "userId": "openidm-admin"
 }'
-curl -si \
+call_curl -si \
   -X POST \
   -H 'Content-Type: application/json' \
   -H "X-OpenIDM-Username: $ADMIN_USERNAME" \
   -H "X-OpenIDM-Password: $ADMIN_PASSWORD" \
   -d "$CLAIM_DATA" \
-  --connect-to "wrenidm.wrensecurity.local:80:10.0.0.11:8080" \
-  "http://wrenidm.wrensecurity.local/openidm/workflow/taskinstance/$TASK_ID?_action=claim" \
+  "http://wrenidm.wrensecurity.local:8080/openidm/workflow/taskinstance/$TASK_ID?_action=claim" \
 | assert_response_status \
 | assert_response_body '."Task action performed" == "claim"' \
 > /dev/null
@@ -229,35 +215,32 @@ curl -si \
 COMPLETION_DATA='{
   "result": "reject"
 }'
-curl -si \
+call_curl -si \
   -X POST \
   -H 'Content-Type: application/json' \
   -H "X-OpenIDM-Username: $ADMIN_USERNAME" \
   -H "X-OpenIDM-Password: $ADMIN_PASSWORD" \
   -d "$COMPLETION_DATA" \
-  --connect-to "wrenidm.wrensecurity.local:80:10.0.0.11:8080" \
-  "http://wrenidm.wrensecurity.local/openidm/workflow/taskinstance/$TASK_ID?_action=complete" \
+  "http://wrenidm.wrensecurity.local:8080/openidm/workflow/taskinstance/$TASK_ID?_action=complete" \
 | assert_response_status \
 | assert_response_body '."Task action performed" == "complete"' \
 > /dev/null
 
-curl -si \
+call_curl -si \
   -X GET \
   -H "X-OpenIDM-Username: $ADMIN_USERNAME" \
   -H "X-OpenIDM-Password: $ADMIN_PASSWORD" \
-  --connect-to "wrenidm.wrensecurity.local:80:10.0.0.11:8080" \
-  "http://wrenidm.wrensecurity.local/openidm/workflow/taskinstance/history?_queryId=filtered-query&processInstanceId=$WORKFLOW_ID&taskDefinitionKey=approval" \
+  "http://wrenidm.wrensecurity.local:8080/openidm/workflow/taskinstance/history?_queryId=filtered-query&processInstanceId=$WORKFLOW_ID&taskDefinitionKey=approval" \
 | assert_response_status \
 | assert_response_body '.resultCount == 1' \
 | assert_response_body '.result[0].endTime != null' \
 > /dev/null
 
-curl -si \
+call_curl -si \
   -X GET \
   -H "X-OpenIDM-Username: $ADMIN_USERNAME" \
   -H "X-OpenIDM-Password: $ADMIN_PASSWORD" \
-  --connect-to "wrenidm.wrensecurity.local:80:10.0.0.11:8080" \
-  "http://wrenidm.wrensecurity.local/openidm/workflow/processinstance/history/$WORKFLOW_ID" \
+  "http://wrenidm.wrensecurity.local:8080/openidm/workflow/processinstance/history/$WORKFLOW_ID" \
 | assert_response_status \
 | assert_response_body '.processVariables.decision == "reject"' \
 | assert_response_body '.tasks[0].taskLocalVariables.result == "reject"' \

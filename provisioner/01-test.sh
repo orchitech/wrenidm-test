@@ -5,12 +5,11 @@
 
 log_message "01-test.sh..."
 
-curl -si \
+call_curl -si \
   -X POST \
   -H "X-OpenIDM-Username: $ADMIN_USERNAME" \
   -H "X-OpenIDM-Password: $ADMIN_PASSWORD" \
-  --connect-to "wrenidm.wrensecurity.local:80:10.0.0.11:8080" \
-  "http://wrenidm.wrensecurity.local/openidm/system/ldap?_action=test" \
+  "http://wrenidm.wrensecurity.local:8080/openidm/system/ldap?_action=test" \
 | assert_response_status \
 | assert_response_body '.ok == true' \
 > /dev/null

@@ -14,22 +14,20 @@ EMAIL_DATA='{
 }'
 
 # 1. Send Email
-curl -si \
+call_curl -si \
   -X POST \
   -H 'Content-Type: application/json' \
   -H "X-OpenIDM-Username: $ADMIN_USERNAME" \
   -H "X-OpenIDM-Password: $ADMIN_PASSWORD" \
   -d "$EMAIL_DATA" \
-  --connect-to "wrenidm.wrensecurity.local:80:10.0.0.11:8080" \
-  "http://wrenidm.wrensecurity.local/openidm/external/email?_action=send" \
+  "http://wrenidm.wrensecurity.local:8080/openidm/external/email?_action=send" \
 | assert_response_status \
 | assert_response_body '.status == "OK"' \
 > /dev/null
 
 # 2. Check mail inbox
-curl -si \
+call_curl -si \
   -X GET \
-  --connect-to "smtp.wrensecurity.local:8025:10.0.0.41:8025" \
   "http://smtp.wrensecurity.local:8025/api/v2/messages" \
 | assert_response_status \
 | assert_response_body '.total == 1' \

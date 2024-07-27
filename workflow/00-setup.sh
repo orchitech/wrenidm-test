@@ -13,14 +13,13 @@ MANAGED_USER_DATA='{
   "mail": "john.doe@wrensecurity.org",
   "password":"FooBar123"
 }'
-curl -si \
+call_curl -si \
   -X PUT \
   -H 'Content-Type: application/json' \
   -H "X-OpenIDM-Username: $ADMIN_USERNAME" \
   -H "X-OpenIDM-Password: $ADMIN_PASSWORD" \
   -d "$MANAGED_USER_DATA" \
-  --connect-to "wrenidm.wrensecurity.local:80:10.0.0.11:8080" \
-  "http://wrenidm.wrensecurity.local/openidm/managed/user/workflow" \
+  "http://wrenidm.wrensecurity.local:8080/openidm/managed/user/workflow" \
 | assert_response_status 201 \
 > /dev/null
 
@@ -29,13 +28,12 @@ MANAGED_ROLE_DATA='{
   "name": "employee",
   "description":"Role for employees."
 }'
-curl -si \
+call_curl -si \
   -X PUT \
   -H 'Content-Type: application/json' \
   -H "X-OpenIDM-Username: $ADMIN_USERNAME" \
   -H "X-OpenIDM-Password: $ADMIN_PASSWORD" \
   -d "$MANAGED_ROLE_DATA" \
-  --connect-to "wrenidm.wrensecurity.local:80:10.0.0.11:8080" \
-  "http://wrenidm.wrensecurity.local/openidm/managed/role/employee" \
+  "http://wrenidm.wrensecurity.local:8080/openidm/managed/role/employee" \
 | assert_response_status 201 \
 > /dev/null

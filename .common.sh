@@ -64,7 +64,7 @@ stop_idm() {
 }
 
 exec_idm() {
-  docker compose exec wrenidm "$@"
+  docker compose exec -T wrenidm "$@"
 }
 
 start_db() {
