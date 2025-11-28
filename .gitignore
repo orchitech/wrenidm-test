@@ -1,1 +1,8 @@
 .cookies/
+
+# Maven build artifacts
+target/
+
+# IDE files
+*.iml
+.idea/
