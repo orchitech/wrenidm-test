@@ -27,6 +27,8 @@ import tools.jackson.databind.ObjectMapper;
 
 public abstract class BaseWrenidmTest {
 
+    protected static final int MAX_PROVISIONER_WAIT_SECONDS = 30;
+
     // Default Wren:IDM Docker container name
     protected static final String WRENIDM_CONTAINER_NAME = "wrenidm";
 
@@ -35,7 +37,14 @@ public abstract class BaseWrenidmTest {
     protected static final String ANONYMOUS_AUTHORIZATION_HEADER_VALUE = "Basic " + Base64.getEncoder()
             .encodeToString("anonymous:anonymous".getBytes());
 
+    protected static final String ADMIN_AUTHORIZATION_HEADER_VALUE = "Basic " + Base64.getEncoder()
+            .encodeToString("openidm-admin:openidm-admin".getBytes());
+
     protected static final ObjectMapper mapper = new ObjectMapper();
+
+    protected static final HttpClient httpClient = HttpClient.newHttpClient();
+
+    protected ComposeContainer environment;
 
     protected static final HttpWaitStrategy WRENIDM_STARTUP_WAIT_STRATEGY = Wait
             .forHttp("/openidm/info/ping")
@@ -48,8 +57,12 @@ public abstract class BaseWrenidmTest {
             })
             .withReadTimeout(Duration.ofMinutes(5));
 
-    protected final HttpClient httpClient = HttpClient.newHttpClient();
-
-    protected ComposeContainer environment;
-
+    protected static HttpWaitStrategy provisionerWaitStrategy(String provisionerName) {
+                return Wait
+                        .forHttp("/openidm/system/" + provisionerName + "?_action=test")
+                        .withHeader("Authorization", ADMIN_AUTHORIZATION_HEADER_VALUE)
+                        .withHeader("Content-Type", "application/json")
+                        .forStatusCode(200)
+                        .withReadTimeout(Duration.ofMinutes(2));
+        }
 }
