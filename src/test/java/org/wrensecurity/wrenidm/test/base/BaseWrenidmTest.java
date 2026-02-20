@@ -35,6 +35,9 @@ public abstract class BaseWrenidmTest {
     protected static final String ANONYMOUS_AUTHORIZATION_HEADER_VALUE = "Basic " + Base64.getEncoder()
             .encodeToString("anonymous:anonymous".getBytes());
 
+    protected static final String ADMIN_AUTHORIZATION_HEADER_VALUE = "Basic " + Base64.getEncoder()
+            .encodeToString("openidm-admin:openidm-admin".getBytes());
+
     protected static final ObjectMapper mapper = new ObjectMapper();
 
     protected static final HttpWaitStrategy WRENIDM_STARTUP_WAIT_STRATEGY = Wait
