@@ -84,7 +84,7 @@ public class EmailTest extends BaseWrenidmTest {
         assertEquals(200, inboxResp.statusCode());
         JsonNode inbox = mapper.readTree(inboxResp.body());
         assertEquals(1, inbox.get("total").asInt());
-        
+
         JsonNode message = inbox.get("items").get(0);
         JsonNode headers = message.get("Content").get("Headers");
         assertTrue(headers.get("Content-Type").get(0).asString().contains("text/html"));

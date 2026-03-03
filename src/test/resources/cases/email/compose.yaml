@@ -5,14 +5,9 @@ services:
       service: wrenidm
     volumes:
       - ./conf/external.email.json:/opt/wrenidm/conf/external.email.json:ro
-      - ./script/access.js:/opt/wrenidm/script/access.js:ro
 
   smtp:
     image: mailhog/mailhog
     ports:
       - 1025:1025
       - 8025:8025
-    networks:
-      default:
-        aliases:
-          - smtp.wrensecurity.local

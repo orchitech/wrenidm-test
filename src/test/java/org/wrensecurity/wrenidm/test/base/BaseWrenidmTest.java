@@ -27,8 +27,6 @@ import tools.jackson.databind.ObjectMapper;
 
 public abstract class BaseWrenidmTest {
 
-    protected static final int MAX_PROVISIONER_WAIT_SECONDS = 30;
-
     // Default Wren:IDM Docker container name
     protected static final String WRENIDM_CONTAINER_NAME = "wrenidm";
 
@@ -42,7 +40,7 @@ public abstract class BaseWrenidmTest {
 
     protected static final ObjectMapper mapper = new ObjectMapper();
 
-    protected static final HttpClient httpClient = HttpClient.newHttpClient();
+    protected final HttpClient httpClient = HttpClient.newHttpClient();
 
     protected ComposeContainer environment;
 
@@ -57,12 +55,4 @@ public abstract class BaseWrenidmTest {
             })
             .withReadTimeout(Duration.ofMinutes(5));
 
-    protected static HttpWaitStrategy provisionerWaitStrategy(String provisionerName) {
-                return Wait
-                        .forHttp("/openidm/system/" + provisionerName + "?_action=test")
-                        .withHeader("Authorization", ADMIN_AUTHORIZATION_HEADER_VALUE)
-                        .withHeader("Content-Type", "application/json")
-                        .forStatusCode(200)
-                        .withReadTimeout(Duration.ofMinutes(2));
-        }
 }

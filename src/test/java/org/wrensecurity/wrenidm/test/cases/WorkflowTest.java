@@ -39,6 +39,9 @@ import tools.jackson.databind.JsonNode;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+/**
+ * @deprecated This class needs to be refactored.
+ */
 public class WorkflowTest extends BaseWrenidmTest {
 
     private static final int MAX_WORKFLOW_COMPLETE_WAIT_SECONDS = 60;

@@ -4,13 +4,12 @@ services:
       file: ../../base/common-services.yml
       service: wrenidm
     volumes:
+      - ./conf/datasource.jdbc-default.json:/opt/wrenidm/conf/datasource.jdbc-default.json:ro
       - ./conf/provisioner.openicf-csv.json:/opt/wrenidm/conf/provisioner.openicf-csv.json:ro
       - ./conf/provisioner.openicf-ldap.json:/opt/wrenidm/conf/provisioner.openicf-ldap.json:ro
-      - ./conf/sync.json:/opt/wrenidm/conf/sync.json:ro
-      - ./conf/repo.jdbc.json:/opt/wrenidm/conf/repo.jdbc.json:ro
-      - ./conf/datasource.jdbc-default.json:/opt/wrenidm/conf/datasource.jdbc-default.json:ro
-      - ./connectors:/opt/wrenidm/connectors:ro
       - ./data:/tmp/data
+      - ./conf/repo.jdbc.json:/opt/wrenidm/conf/repo.jdbc.json:ro
+      - ./conf/sync.json:/opt/wrenidm/conf/sync.json:ro
     depends_on:
       ldap:
         condition: service_healthy
@@ -37,7 +36,3 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
-    networks:
-      default:
-        aliases:
-          - ldap.wrensecurity.local

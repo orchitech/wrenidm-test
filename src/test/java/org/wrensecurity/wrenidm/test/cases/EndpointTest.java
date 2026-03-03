@@ -75,14 +75,14 @@ public class EndpointTest extends BaseWrenidmTest {
 
     @Test
     @Order(2)
-    public void testDefault() throws Exception {
+    public void testDefaultEndpoint() throws Exception {
         HttpRequest queryReq = HttpRequest.newBuilder()
                 .uri(URI.create(WRENIDM_BASE_URL + "/openidm/managed/user?_queryFilter=/userName%20eq%20%22endpoint%22"))
                 .header("Authorization", ADMIN_AUTHORIZATION_HEADER_VALUE)
                 .build();
         HttpResponse<String> queryResp = httpClient.send(queryReq, HttpResponse.BodyHandlers.ofString());
         assertEquals(200, queryResp.statusCode());
-        
+
         JsonNode responseBody = mapper.readTree(queryResp.body());
         assertEquals(1, responseBody.get("resultCount").asInt());
         assertEquals("endpoint", responseBody.get("result").get(0).get("_id").asString());
@@ -90,17 +90,17 @@ public class EndpointTest extends BaseWrenidmTest {
 
     @Test
     @Order(3)
-    public void testCustom() throws Exception {
+    public void testCustomEndpoint() throws Exception {
         HttpRequest queryReq = HttpRequest.newBuilder()
                 .uri(URI.create(WRENIDM_BASE_URL + "/openidm/endpoint/custom/users?_queryId=dummy"))
                 .header("Authorization", ADMIN_AUTHORIZATION_HEADER_VALUE)
                 .build();
         HttpResponse<String> queryResp = httpClient.send(queryReq, HttpResponse.BodyHandlers.ofString());
         assertEquals(200, queryResp.statusCode());
-        
+
         JsonNode responseBody = mapper.readTree(queryResp.body());
         assertEquals(1, responseBody.get("resultCount").asInt());
         assertEquals("endpoint", responseBody.get("result").get(0).get("_id").asString());
     }
-    
+
 }

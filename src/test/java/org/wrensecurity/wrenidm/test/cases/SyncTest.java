@@ -15,7 +15,9 @@
  */
 package org.wrensecurity.wrenidm.test.cases;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.File;
 import java.net.URI;
@@ -23,28 +25,23 @@ import java.net.URLEncoder;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
-
+import java.time.Duration;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestMethodOrder;
-import org.junit.jupiter.api.MethodOrderer;
 import org.testcontainers.containers.ComposeContainer;
+import org.testcontainers.containers.wait.strategy.HttpWaitStrategy;
+import org.testcontainers.containers.wait.strategy.Wait;
 import org.wrensecurity.wrenidm.test.base.BaseWrenidmTest;
-
 import tools.jackson.databind.JsonNode;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class SyncTest extends BaseWrenidmTest {
-
-    private static final String USER_ID = "sync2";
-    private static final String RECON_MAPPING = "csvEmployee_managedUser";
-    private static final String AUDIT_MAPPING = "managedUser_ldapAccount";
-
-    private static final int MAX_IMPLICIT_SYNC_WAIT_SECONDS = 60;
 
     private static final String MANAGED_USER_DATA = """
         {
@@ -57,6 +54,12 @@ public class SyncTest extends BaseWrenidmTest {
         }
         """;
 
+    private final HttpWaitStrategy LDAP_PROVISIONER_WAIT_STRATEGY = Wait
+            .forHttp("/openidm/system/ldap?_action=test")
+            .withHeader("Authorization", ADMIN_AUTHORIZATION_HEADER_VALUE)
+            .forStatusCode(200)
+            .withReadTimeout(Duration.ofMinutes(5));
+
     private String reconId;
 
     @BeforeAll
@@ -64,7 +67,7 @@ public class SyncTest extends BaseWrenidmTest {
         environment = new ComposeContainer(new File("src/test/resources/cases/sync/compose.yaml"));
         environment.waitingFor(WRENIDM_CONTAINER_NAME, WRENIDM_STARTUP_WAIT_STRATEGY);
         environment.start();
-        environment.waitingFor(WRENIDM_CONTAINER_NAME, provisionerWaitStrategy("ldap"));
+        environment.waitingFor(WRENIDM_CONTAINER_NAME, LDAP_PROVISIONER_WAIT_STRATEGY);
     }
 
     @AfterAll
@@ -77,22 +80,22 @@ public class SyncTest extends BaseWrenidmTest {
     @Test
     @Order(1)
     public void testSetup() throws Exception {
-        HttpRequest req = HttpRequest.newBuilder(URI.create(WRENIDM_BASE_URL + "/openidm/managed/user/" + USER_ID))
-            .header("Authorization", ADMIN_AUTHORIZATION_HEADER_VALUE)
-            .header("Content-Type", "application/json")
-            .PUT(HttpRequest.BodyPublishers.ofString(MANAGED_USER_DATA))
-            .build();
+        HttpRequest req = HttpRequest.newBuilder(URI.create(WRENIDM_BASE_URL + "/openidm/managed/user/sync2"))
+                .header("Authorization", ADMIN_AUTHORIZATION_HEADER_VALUE)
+                .header("Content-Type", "application/json")
+                .PUT(HttpRequest.BodyPublishers.ofString(MANAGED_USER_DATA))
+                .build();
         HttpResponse<String> resp = httpClient.send(req, HttpResponse.BodyHandlers.ofString());
         assertEquals(201, resp.statusCode());
     }
 
     @Test
     @Order(2)
-    public void testReconciliation() throws Exception {
-        HttpRequest req = HttpRequest.newBuilder(URI.create(WRENIDM_BASE_URL + "/openidm/recon?_action=recon&mapping=" + RECON_MAPPING + "&waitForCompletion=true"))
-            .header("Authorization", ADMIN_AUTHORIZATION_HEADER_VALUE)
-            .POST(HttpRequest.BodyPublishers.noBody())
-            .build();
+    public void testSourceReconciliation() throws Exception {
+        HttpRequest req = HttpRequest.newBuilder(URI.create(WRENIDM_BASE_URL + "/openidm/recon?_action=recon&mapping=csvEmployee_managedUser&waitForCompletion=true"))
+                .header("Authorization", ADMIN_AUTHORIZATION_HEADER_VALUE)
+                .POST(HttpRequest.BodyPublishers.noBody())
+                .build();
         HttpResponse<String> resp = httpClient.send(req, HttpResponse.BodyHandlers.ofString());
         assertEquals(200, resp.statusCode());
 
@@ -105,8 +108,8 @@ public class SyncTest extends BaseWrenidmTest {
     @Order(3)
     public void testReconciliationResult() throws Exception {
         HttpRequest req = HttpRequest.newBuilder(URI.create(WRENIDM_BASE_URL + "/openidm/recon/" + reconId))
-            .header("Authorization", ADMIN_AUTHORIZATION_HEADER_VALUE)
-            .build();
+                .header("Authorization", ADMIN_AUTHORIZATION_HEADER_VALUE)
+                .build();
         HttpResponse<String> resp = httpClient.send(req, HttpResponse.BodyHandlers.ofString());
         assertEquals(200, resp.statusCode());
 
@@ -119,11 +122,11 @@ public class SyncTest extends BaseWrenidmTest {
 
     @Test
     @Order(4)
-    public void testManagedUsers() throws Exception {
+    public void testQueryManagedUsers() throws Exception {
         String encodedFilter = URLEncoder.encode("/userName sw \"sync\"", StandardCharsets.UTF_8);
         HttpRequest req = HttpRequest.newBuilder(URI.create(WRENIDM_BASE_URL + "/openidm/managed/user?_queryFilter=" + encodedFilter))
-            .header("Authorization", ADMIN_AUTHORIZATION_HEADER_VALUE)
-            .build();
+                .header("Authorization", ADMIN_AUTHORIZATION_HEADER_VALUE)
+                .build();
         HttpResponse<String> resp = httpClient.send(req, HttpResponse.BodyHandlers.ofString());
         assertEquals(200, resp.statusCode());
 
@@ -138,52 +141,38 @@ public class SyncTest extends BaseWrenidmTest {
     @Test
     @Order(5)
     public void testImplicitSync() throws Exception {
-        String filter =
-                "/mapping eq \"" + AUDIT_MAPPING + "\" and " +
+        String filter = URLEncoder.encode(
+                "/mapping eq \"managedUser_ldapAccount\" and " +
                 "/sourceObjectId sw \"managed/user/sync\" and " +
-                "/status eq \"SUCCESS\"";
+                "/status eq \"SUCCESS\"", StandardCharsets.UTF_8);
 
-        final int expected = 2;
-        final long deadlineNanos = System.nanoTime()
-                + java.util.concurrent.TimeUnit.SECONDS.toNanos(MAX_IMPLICIT_SYNC_WAIT_SECONDS);
+        int attempts = 100;
 
-        Integer lastResultCount = null;
-        String lastBody = null;
-
-        while (System.nanoTime() < deadlineNanos) {
-            String encoded = URLEncoder.encode(filter, StandardCharsets.UTF_8);
-            HttpRequest req = HttpRequest.newBuilder(
-                    URI.create(WRENIDM_BASE_URL + "/openidm/audit/sync?_queryFilter=" + encoded))
+        while (--attempts > 0) {
+            HttpRequest req = HttpRequest.newBuilder(URI.create(WRENIDM_BASE_URL + "/openidm/audit/sync?_queryFilter=" + filter))
                     .header("Authorization", ADMIN_AUTHORIZATION_HEADER_VALUE)
                     .build();
 
             HttpResponse<String> resp = httpClient.send(req, HttpResponse.BodyHandlers.ofString());
             assertEquals(200, resp.statusCode());
 
-            lastBody = resp.body();
-            JsonNode body = mapper.readTree(lastBody);
-            lastResultCount = body.path("resultCount").asInt();
-
-            if (lastResultCount == expected) {
+            JsonNode body = mapper.readTree(resp.body());
+            if (body.path("resultCount").asInt() == 2) {
                 return;
             }
 
             Thread.sleep(1000);
         }
 
-        fail("Timed out after " + MAX_IMPLICIT_SYNC_WAIT_SECONDS
-                + "s waiting for implicit sync audit success records. "
-                + "Expected resultCount=" + expected
-                + " but last resultCount=" + lastResultCount
-                + ". Last response body: " + lastBody);
+        fail("Implicit synchronization to LDAP failed.");
     }
 
     @Test
     @Order(6)
-    public void testLdapAccountsExist() throws Exception {
+    public void testLdapAccounts() throws Exception {
         HttpRequest req = HttpRequest.newBuilder(URI.create(WRENIDM_BASE_URL + "/openidm/system/ldap/account?_queryId=query-all-ids"))
-            .header("Authorization", ADMIN_AUTHORIZATION_HEADER_VALUE)
-            .build();
+                .header("Authorization", ADMIN_AUTHORIZATION_HEADER_VALUE)
+                .build();
         HttpResponse<String> resp = httpClient.send(req, HttpResponse.BodyHandlers.ofString());
         assertEquals(200, resp.statusCode());
 

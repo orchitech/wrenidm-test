@@ -29,6 +29,7 @@ Before running any tests, make sure the following entries are in your hosts file
 
 ```console
 127.0.0.1 wrenidm.wrensecurity.local
+127.0.0.1 smtp.wrensecurity.local
 ```
 
 Tests can be run using the _Maven Surefire Plugin_:
