@@ -35,7 +35,14 @@ public abstract class BaseWrenidmTest {
     protected static final String ANONYMOUS_AUTHORIZATION_HEADER_VALUE = "Basic " + Base64.getEncoder()
             .encodeToString("anonymous:anonymous".getBytes());
 
+    protected static final String ADMIN_AUTHORIZATION_HEADER_VALUE = "Basic " + Base64.getEncoder()
+            .encodeToString("openidm-admin:openidm-admin".getBytes());
+
     protected static final ObjectMapper mapper = new ObjectMapper();
+
+    protected final HttpClient httpClient = HttpClient.newHttpClient();
+
+    protected ComposeContainer environment;
 
     protected static final HttpWaitStrategy WRENIDM_STARTUP_WAIT_STRATEGY = Wait
             .forHttp("/openidm/info/ping")
@@ -47,9 +54,5 @@ public abstract class BaseWrenidmTest {
                 return "ACTIVE_READY".equals(responseBody.get("state"));
             })
             .withReadTimeout(Duration.ofMinutes(5));
-
-    protected final HttpClient httpClient = HttpClient.newHttpClient();
-
-    protected ComposeContainer environment;
 
 }
