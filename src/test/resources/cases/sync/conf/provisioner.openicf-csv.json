@@ -2,7 +2,7 @@
     "name": "csv",
     "enabled": true,
     "connectorRef": {
-        "bundleName": "org.wrensecurity.wrenicf.connector.csvfile-connector",
+        "bundleName": "org.wrensecurity.wrenicf.connectors.csvfile-connector",
         "bundleVersion": "[1.4.0.0,2.0.0.0)",
         "connectorName": "org.forgerock.openicf.csvfile.CSVFileConnector"
     },

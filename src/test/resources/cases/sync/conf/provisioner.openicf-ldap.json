@@ -1,7 +1,7 @@
 {
     "name": "ldap",
     "connectorRef": {
-        "bundleName": "org.wrensecurity.wrenicf.connector.ldap-connector",
+        "bundleName": "org.wrensecurity.wrenicf.connectors.ldap-connector",
         "bundleVersion": "[1.4.0.0,2.0.0.0)",
         "connectorName": "org.identityconnectors.ldap.LdapConnector"
     },
