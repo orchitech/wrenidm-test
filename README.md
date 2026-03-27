@@ -1,3 +1,6 @@
+> [!WARNING]
+> This repository has been migrated under [`wrensec-test`](https://github.com/orchitech/wrensec-test/) project.
+
 # Wren:IDM System Tests
 
 Repository containing Wren:IDM system tests.
